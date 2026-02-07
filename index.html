@@ -97,8 +97,11 @@
         <div id="quizPrompt" class="big"></div>
         <input id="quizInput" type="text" placeholder="Digite aqui..."/>
         <div class="row" style="margin-top:10px">
-          <button id="checkBtn">Conferir</button>
-          <button class="secondary" id="newQuizBtn">Nova pergunta</button>
+         <button id="showBtn">Mostrar resposta</button>
+<button class="secondary" onclick="speak()">Ouvir</button>
+<button class="secondary" onclick="stopSpeak()">Parar</button>
+<button class="secondary" id="nextBtn">Próximo</button>
+
         </div>
         <div id="result" class="muted" style="margin-top:8px"></div>
         <div class="muted" style="margin-top:10px">
@@ -276,14 +279,12 @@
     document.getElementById("quizInput").value = "";
     document.getElementById("result").textContent = "";
   }
-function speak(){
-  speechSynthesis.cancel(); // para não acumular vozes
-  const text = document.getElementById("cardFront").textContent;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "en-US";
-  utter.rate = 0.9;
-  speechSynthesis.speak(utter);
+function showAnswer(){
+  const back = document.getElementById("cardBack");
+  back.style.display = back.style.display === "none" ? "block" : "none";
+  speak();
 }
+
 
 function stopSpeak(){
   speechSynthesis.cancel();
