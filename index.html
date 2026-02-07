@@ -34,6 +34,7 @@
     .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; background:#f0f0f0; padding:2px 6px; border-radius:8px; }
   </style>
 </head>
+
 <body>
 <header>
   <h1>Inglês em 30 dias — Micro-App</h1>
@@ -85,11 +86,17 @@
         <div class="muted">Flashcards do dia</div>
         <div class="big" id="cardFront"></div>
         <div class="muted" id="cardBack" style="display:none"></div>
+
         <div class="row" style="margin-top:10px">
           <button id="showBtn">Mostrar resposta</button>
+          <button class="secondary" id="speakBtn">Ouvir</button>
+          <button class="secondary" id="stopBtn">Parar</button>
           <button class="secondary" id="nextBtn">Próximo</button>
         </div>
-        <div class="muted" style="margin-top:8px">Dica: fale em voz alta 2x antes de mostrar a resposta.</div>
+
+        <div class="muted" style="margin-top:8px">
+          Dica: fale em voz alta 2x antes de mostrar a resposta.
+        </div>
       </div>
 
       <div class="q">
@@ -97,11 +104,8 @@
         <div id="quizPrompt" class="big"></div>
         <input id="quizInput" type="text" placeholder="Digite aqui..."/>
         <div class="row" style="margin-top:10px">
-         <button id="showBtn">Mostrar resposta</button>
-<button class="secondary" onclick="speak()">Ouvir</button>
-<button class="secondary" onclick="stopSpeak()">Parar</button>
-<button class="secondary" id="nextBtn">Próximo</button>
-
+          <button id="checkBtn">Conferir</button>
+          <button class="secondary" id="newQuizBtn">Nova pergunta</button>
         </div>
         <div id="result" class="muted" style="margin-top:8px"></div>
         <div class="muted" style="margin-top:10px">
@@ -116,7 +120,7 @@
         <li>Faça 10–20 minutos por dia.</li>
         <li>Não pule revisão: ela é a parte que faz você lembrar.</li>
         <li>Fale em voz alta (mesmo sozinho).</li>
-        <li>Se errar, ótimo: repita 3 vezes e siga.</li>
+        <li>Se errar, repita 3 vezes e siga.</li>
       </ul>
 
       <hr style="border:none; border-top:1px solid #eee; margin:14px 0">
@@ -137,9 +141,7 @@
 </div>
 
 <script>
-  // Dados do curso (simples e eficaz)
   const daysData = Array.from({length: 30}, (_, i) => {
-    const d = i+1;
     const goals = [
       "Cumprimentos + apresentações",
       "Números + horas",
@@ -173,7 +175,7 @@
       "Desafio: 10 minutos falando"
     ];
     return {
-      day: d,
+      day: i+1,
       goal: goals[i],
       routine: [
         "2 min: Leia o objetivo do dia",
@@ -185,7 +187,6 @@
     };
   });
 
-  // Flashcards base (vamos reaproveitar e rotacionar por dia)
   const baseCards = [
     {en:"Hello! How are you?", pt:"Olá! Como você está?"},
     {en:"My name is __.", pt:"Meu nome é __."},
@@ -218,16 +219,25 @@
   };
 
   function cardsForDay(day){
-    // Rotaciona os cards para cada dia, mantendo simples.
     const shift = (day-1) % baseCards.length;
     const rotated = baseCards.slice(shift).concat(baseCards.slice(0, shift));
-    return rotated.slice(0, 8); // 8 cards/dia
+    return rotated.slice(0, 8);
+  }
+
+  function buildSpeakScript(level, goal){
+    if(level === "A1"){
+      return `Fale por 1 minuto:\n- Hello, my name is __.\n- I’m from Brazil.\n- Today: ${goal}.\n- I like __.\n- Please speak slowly.\n- Thank you!`;
+    }
+    if(level === "A2"){
+      return `Fale por 2 minutos:\n- Hi, I’m __ and I’m from Brazil.\n- Today I’m practicing: ${goal}.\n- In my routine, I usually __.\n- I want to __ because __.\n- Can you help me with __?\n- See you later!`;
+    }
+    return `Fale por 3 minutos:\n- Introduce yourself and your day.\n- Explain: ${goal}.\n- Give 2 examples using because.\n- Ask 3 questions (Where/What/How).\n- End with a short summary.`;
   }
 
   function updateUI(){
-    const d = state.day;
-    const dd = daysData[d-1];
-    document.getElementById("title").textContent = `Dia ${d}`;
+    const dd = daysData[state.day-1];
+
+    document.getElementById("title").textContent = `Dia ${state.day}`;
     document.getElementById("goal").textContent = `Objetivo: ${dd.goal}`;
     document.getElementById("level").value = state.level;
 
@@ -243,13 +253,11 @@
       routineEl.appendChild(li);
     });
 
-    // Progress
     const doneCount = state.done.length;
     const pct = Math.round((doneCount/30)*100);
     document.getElementById("bar").style.width = pct + "%";
     document.getElementById("pct").textContent = `${doneCount}/30 dias concluídos (${pct}%)`;
 
-    // Days grid
     const daysEl = document.getElementById("days");
     daysEl.innerHTML = "";
     for(let i=1;i<=30;i++){
@@ -262,54 +270,39 @@
       daysEl.appendChild(b);
     }
 
-    // Flashcard
     const cards = cardsForDay(state.day);
     const c = cards[state.idx % cards.length];
     document.getElementById("cardFront").textContent = c.en;
     document.getElementById("cardBack").textContent = c.pt;
     document.getElementById("cardBack").style.display = "none";
 
-    // Script de fala
     const script = buildSpeakScript(state.level, dd.goal);
     document.getElementById("speakScript").innerHTML = script.replace(/\n/g,"<br/>");
 
-    // Quiz prompt
     const q = cards[state.quizIdx % cards.length];
     document.getElementById("quizPrompt").textContent = `Traduza: "${q.pt}"`;
     document.getElementById("quizInput").value = "";
     document.getElementById("result").textContent = "";
   }
-function showAnswer(){
-  const back = document.getElementById("cardBack");
-  back.style.display = back.style.display === "none" ? "block" : "none";
-  speak();
-}
 
+  function speak(){
+    speechSynthesis.cancel();
+    const text = document.getElementById("cardFront").textContent;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "en-US";
+    utter.rate = 0.9;
+    speechSynthesis.speak(utter);
+  }
 
-function stopSpeak(){
-  speechSynthesis.cancel();
-}
-
-  function buildSpeakScript(level, goal){
-    if(level === "A1"){
-      return `Fale por 1 minuto:\n- Hello, my name is __.\n- I’m from Brazil.\n- Today: ${goal}.\n- I like __.\n- Please speak slowly.\n- Thank you!`;
-    }
-    if(level === "A2"){
-      return `Fale por 2 minutos:\n- Hi, I’m __ and I’m from Brazil.\n- Today I’m practicing: ${goal}.\n- In my routine, I usually __.\n- I want to __ because __.\n- Can you help me with __?\n- See you later!`;
-    }
-    return `Fale por 3 minutos:\n- Introduce yourself and your day.\n- Explain: ${goal}.\n- Give 2 examples using because.\n- Ask 3 questions (Where/What/How).\n- End with a short summary.`;
+  function stopSpeak(){
+    speechSynthesis.cancel();
   }
 
   function showAnswer(){
-  const back = document.getElementById("cardBack");
-  back.style.display = back.style.display === "none" ? "block" : "none";
-
-  const text = document.getElementById("cardFront").textContent;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "en-US";
-  utter.rate = 0.9;
-  speechSynthesis.speak(utter);
-}
+    const back = document.getElementById("cardBack");
+    back.style.display = back.style.display === "none" ? "block" : "none";
+    speak();
+  }
 
   function nextCard(){
     state.idx++;
@@ -350,7 +343,6 @@ function stopSpeak(){
     const user = normalize(document.getElementById("quizInput").value);
     const ans = normalize(q.en);
 
-    // Aceita pequenas variações:
     const ok = user === ans
       || user.replace("i’m","im") === ans.replace("i’m","im")
       || user.replace("please","pls") === ans;
@@ -366,9 +358,13 @@ function stopSpeak(){
   }
 
   document.getElementById("showBtn").onclick = showAnswer;
+  document.getElementById("speakBtn").onclick = speak;
+  document.getElementById("stopBtn").onclick = stopSpeak;
   document.getElementById("nextBtn").onclick = nextCard;
+
   document.getElementById("markBtn").onclick = markDone;
   document.getElementById("resetBtn").onclick = resetAll;
+
   document.getElementById("newQuizBtn").onclick = () => { newQuiz(); updateUI(); };
   document.getElementById("checkBtn").onclick = checkQuiz;
 
@@ -382,10 +378,8 @@ function stopSpeak(){
     updateUI();
   });
 
-  // Init
   newQuiz();
   updateUI();
 </script>
 </body>
 </html>
-  
