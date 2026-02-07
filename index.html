@@ -338,24 +338,32 @@
   }
 
   function checkQuiz(){
-    const cards = cardsForDay(state.day);
-    const q = cards[state.quizIdx % cards.length];
-    const user = normalize(document.getElementById("quizInput").value);
-    const ans = normalize(q.en);
+  const cards = cardsForDay(state.day);
+  const q = cards[state.quizIdx % cards.length];
 
-    const ok = user === ans
-      || user.replace("i’m","im") === ans.replace("i’m","im")
-      || user.replace("please","pls") === ans;
+  const userRaw = document.getElementById("quizInput").value;
+  const user = normalize(userRaw);
+  const ansEN = normalize(q.en);
+  const ansPT = normalize(q.pt);
 
-    const result = document.getElementById("result");
-    if(ok){
-      result.innerHTML = `<span class="ok">Correto.</span> Resposta: ${q.en}`;
-      newQuiz();
-    }else{
-      result.innerHTML = `<span class="bad">Quase.</span> O certo é: ${q.en}`;
-    }
-    updateUI();
+  // Aceita responder em inglês OU em português (mais amigável)
+  const ok =
+    user === ansEN ||
+    user === ansPT ||
+    user.replace("i’m","im") === ansEN.replace("i’m","im") ||
+    user.replace("i am","im") === ansEN.replace("i’m","im");
+
+  const result = document.getElementById("result");
+  if(ok){
+    result.innerHTML = `<span class="ok">Correto.</span> Inglês: ${q.en} — Português: ${q.pt}`;
+    newQuiz();
+  }else{
+    result.innerHTML = `<span class="bad">Quase.</span> Correto: Inglês: ${q.en} — Português: ${q.pt}`;
   }
+
+  updateUI();
+}
+
 
   document.getElementById("showBtn").onclick = showAnswer;
   document.getElementById("speakBtn").onclick = speak;
