@@ -276,6 +276,18 @@
     document.getElementById("quizInput").value = "";
     document.getElementById("result").textContent = "";
   }
+function speak(){
+  speechSynthesis.cancel(); // para não acumular vozes
+  const text = document.getElementById("cardFront").textContent;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "en-US";
+  utter.rate = 0.9;
+  speechSynthesis.speak(utter);
+}
+
+function stopSpeak(){
+  speechSynthesis.cancel();
+}
 
   function buildSpeakScript(level, goal){
     if(level === "A1"){
