@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Inglês em 30 dias</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background:#f6f7fb; color:#111; }
+    header { padding:16px; background:#111; color:#fff; }
+    header h1 { margin:0; font-size:18px; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 16px; }
+    .grid { display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 12px; }
+    @media (max-width: 860px){ .grid{ grid-template-columns:1fr; } }
+    .card { background:#fff; border-radius:14px; padding:14px; box-shadow: 0 6px 20px rgba(0,0,0,.06); }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill { padding:6px 10px; border-radius:999px; background:#eef1ff; font-size:12px; }
+    button { border:0; border-radius:12px; padding:10px 12px; background:#2f5bff; color:#fff; cursor:pointer; }
+    button.secondary { background:#eef1ff; color:#111; }
+    button.danger { background:#ff3b3b; }
+    select, input[type="text"] { padding:10px; border-radius:12px; border:1px solid #ddd; width:100%; }
+    .big { font-size:22px; font-weight:700; margin: 6px 0 10px; }
+    .muted { color:#666; font-size:13px; }
+    .q { background:#f6f7fb; border-radius:12px; padding:12px; margin-top:10px; }
+    .ok { color: #1a7f37; font-weight:700; }
+    .bad { color: #b42318; font-weight:700; }
+    .progress { height:10px; background:#eee; border-radius:999px; overflow:hidden; }
+    .bar { height:100%; width:0%; background:#2f5bff; }
+    ul { margin: 8px 0 0 18px; }
+    .days { display:grid; grid-template-columns: repeat(10, 1fr); gap:6px; }
+    @media (max-width: 520px){ .days{ grid-template-columns: repeat(6, 1fr);} }
+    .daybtn { padding:8px; border-radius:12px; background:#fff; border:1px solid #ddd; cursor:pointer; text-align:center; font-size:12px; }
+    .daybtn.done { background:#e9fff0; border-color:#7ae39a; }
+    .daybtn.today { border:2px solid #2f5bff; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; background:#f0f0f0; padding:2px 6px; border-radius:8px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Inglês em 30 dias — Micro-App</h1>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <div class="pill" id="levelPill">Nível: Iniciante</div>
+          <div class="big" id="title">Dia 1</div>
+          <div class="muted" id="goal"></div>
+        </div>
+        <div style="min-width:220px">
+          <div class="muted">Progresso 30 dias</div>
+          <div class="progress"><div class="bar" id="bar"></div></div>
+          <div class="muted" id="pct" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <hr style="border:none; border-top:1px solid #eee; margin:14px 0">
+
+      <div class="row">
+        <div style="flex:1">
+          <div class="muted">Escolha o dia</div>
+          <div class="days" id="days"></div>
+        </div>
+        <div style="width:260px">
+          <div class="muted">Nível</div>
+          <select id="level">
+            <option value="A1">Iniciante (A1)</option>
+            <option value="A2">Básico (A2)</option>
+            <option value="B1">Intermediário (B1)</option>
+          </select>
+          <div class="row" style="margin-top:10px">
+            <button class="secondary" id="markBtn">Marcar dia como feito</button>
+            <button class="danger" id="resetBtn">Zerar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="q">
+        <div class="muted">Rotina do dia (10–20 min)</div>
+        <ul id="routine"></ul>
+      </div>
+
+      <div class="q">
+        <div class="muted">Flashcards do dia</div>
+        <div class="big" id="cardFront"></div>
+        <div class="muted" id="cardBack" style="display:none"></div>
+        <div class="row" style="margin-top:10px">
+          <button id="showBtn">Mostrar resposta</button>
+          <button class="secondary" id="nextBtn">Próximo</button>
+        </div>
+        <div class="muted" style="margin-top:8px">Dica: fale em voz alta 2x antes de mostrar a resposta.</div>
+      </div>
+
+      <div class="q">
+        <div class="muted">Mini-teste (digite a tradução)</div>
+        <div id="quizPrompt" class="big"></div>
+        <input id="quizInput" type="text" placeholder="Digite aqui..."/>
+        <div class="row" style="margin-top:10px">
+          <button id="checkBtn">Conferir</button>
+          <button class="secondary" id="newQuizBtn">Nova pergunta</button>
+        </div>
+        <div id="result" class="muted" style="margin-top:8px"></div>
+        <div class="muted" style="margin-top:10px">
+          Atalho: <span class="kbd">Enter</span> para conferir.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="big">Como usar</div>
+      <ul>
+        <li>Faça 10–20 minutos por dia.</li>
+        <li>Não pule revisão: ela é a parte que faz você lembrar.</li>
+        <li>Fale em voz alta (mesmo sozinho).</li>
+        <li>Se errar, ótimo: repita 3 vezes e siga.</li>
+      </ul>
+
+      <hr style="border:none; border-top:1px solid #eee; margin:14px 0">
+
+      <div class="big">Estrutura dos 30 dias</div>
+      <div class="muted">
+        Dias 1–10: sobrevivência (frases essenciais)<br/>
+        Dias 11–20: rotina + perguntas/respostas<br/>
+        Dias 21–30: conversa e fluência prática
+      </div>
+
+      <hr style="border:none; border-top:1px solid #eee; margin:14px 0">
+
+      <div class="big">Treino de fala (script)</div>
+      <div class="muted" id="speakScript"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Dados do curso (simples e eficaz)
+  const daysData = Array.from({length: 30}, (_, i) => {
+    const d = i+1;
+    const goals = [
+      "Cumprimentos + apresentações",
+      "Números + horas",
+      "Direções + lugares",
+      "Comida e pedidos",
+      "Compras + preços",
+      "Transporte e rotas",
+      "Hotel/ajuda",
+      "Rotina diária",
+      "Perguntas básicas",
+      "Revisão 1–9",
+      "Trabalho/estudo",
+      "Família e descrições",
+      "Saúde (básico)",
+      "Gostos e preferências",
+      "Planos e futuro",
+      "Revisão 10–15",
+      "Conversas curtas",
+      "Erros comuns (be/do/have)",
+      "Passado (simples)",
+      "Revisão 16–19",
+      "Opiniões",
+      "Convites",
+      "Telefone/mensagens",
+      "Viagens",
+      "Revisão 20–24",
+      "Falar sobre você",
+      "Conversar 5 minutos",
+      "Entrevista/atendimento",
+      "Revisão final",
+      "Desafio: 10 minutos falando"
+    ];
+    return {
+      day: d,
+      goal: goals[i],
+      routine: [
+        "2 min: Leia o objetivo do dia",
+        "6 min: Flashcards (fale em voz alta)",
+        "4 min: Mini-teste (digite e corrija)",
+        "4 min: Script de fala (repita 2x)",
+        "Opcional 2 min: ouvir 1 vídeo curto em inglês"
+      ]
+    };
+  });
+
+  // Flashcards base (vamos reaproveitar e rotacionar por dia)
+  const baseCards = [
+    {en:"Hello! How are you?", pt:"Olá! Como você está?"},
+    {en:"My name is __.", pt:"Meu nome é __."},
+    {en:"Nice to meet you.", pt:"Prazer em conhecer você."},
+    {en:"Where are you from?", pt:"De onde você é?"},
+    {en:"I’m from Brazil.", pt:"Eu sou do Brasil."},
+    {en:"How much is it?", pt:"Quanto custa?"},
+    {en:"I want this, please.", pt:"Eu quero isto, por favor."},
+    {en:"Can you help me?", pt:"Você pode me ajudar?"},
+    {en:"I don’t understand.", pt:"Eu não entendo."},
+    {en:"Please speak slowly.", pt:"Por favor fale devagar."},
+    {en:"What time is it?", pt:"Que horas são?"},
+    {en:"Where is the bathroom?", pt:"Onde fica o banheiro?"},
+    {en:"I’m looking for __.", pt:"Estou procurando __."},
+    {en:"I need a taxi.", pt:"Eu preciso de um táxi."},
+    {en:"Let’s go!", pt:"Vamos lá!"},
+    {en:"I like it.", pt:"Eu gosto disso."},
+    {en:"I don’t like it.", pt:"Eu não gosto disso."},
+    {en:"I’m hungry.", pt:"Estou com fome."},
+    {en:"I’m tired.", pt:"Estou cansado(a)."},
+    {en:"See you later.", pt:"Até mais."}
+  ];
+
+  const state = {
+    day: 1,
+    idx: 0,
+    quizIdx: 0,
+    level: localStorage.getItem("level") || "A1",
+    done: JSON.parse(localStorage.getItem("doneDays") || "[]")
+  };
+
+  function cardsForDay(day){
+    // Rotaciona os cards para cada dia, mantendo simples.
+    const shift = (day-1) % baseCards.length;
+    const rotated = baseCards.slice(shift).concat(baseCards.slice(0, shift));
+    return rotated.slice(0, 8); // 8 cards/dia
+  }
+
+  function updateUI(){
+    const d = state.day;
+    const dd = daysData[d-1];
+    document.getElementById("title").textContent = `Dia ${d}`;
+    document.getElementById("goal").textContent = `Objetivo: ${dd.goal}`;
+    document.getElementById("level").value = state.level;
+
+    document.getElementById("levelPill").textContent =
+      state.level === "A1" ? "Nível: Iniciante" :
+      state.level === "A2" ? "Nível: Básico" : "Nível: Intermediário";
+
+    const routineEl = document.getElementById("routine");
+    routineEl.innerHTML = "";
+    dd.routine.forEach(x => {
+      const li = document.createElement("li");
+      li.textContent = x;
+      routineEl.appendChild(li);
+    });
+
+    // Progress
+    const doneCount = state.done.length;
+    const pct = Math.round((doneCount/30)*100);
+    document.getElementById("bar").style.width = pct + "%";
+    document.getElementById("pct").textContent = `${doneCount}/30 dias concluídos (${pct}%)`;
+
+    // Days grid
+    const daysEl = document.getElementById("days");
+    daysEl.innerHTML = "";
+    for(let i=1;i<=30;i++){
+      const b = document.createElement("div");
+      b.className = "daybtn";
+      if(state.done.includes(i)) b.classList.add("done");
+      if(i === state.day) b.classList.add("today");
+      b.textContent = i;
+      b.onclick = () => { state.day = i; state.idx = 0; newQuiz(); updateUI(); };
+      daysEl.appendChild(b);
+    }
+
+    // Flashcard
+    const cards = cardsForDay(state.day);
+    const c = cards[state.idx % cards.length];
+    document.getElementById("cardFront").textContent = c.en;
+    document.getElementById("cardBack").textContent = c.pt;
+    document.getElementById("cardBack").style.display = "none";
+
+    // Script de fala
+    const script = buildSpeakScript(state.level, dd.goal);
+    document.getElementById("speakScript").innerHTML = script.replace(/\n/g,"<br/>");
+
+    // Quiz prompt
+    const q = cards[state.quizIdx % cards.length];
+    document.getElementById("quizPrompt").textContent = `Traduza: "${q.pt}"`;
+    document.getElementById("quizInput").value = "";
+    document.getElementById("result").textContent = "";
+  }
+
+  function buildSpeakScript(level, goal){
+    if(level === "A1"){
+      return `Fale por 1 minuto:\n- Hello, my name is __.\n- I’m from Brazil.\n- Today: ${goal}.\n- I like __.\n- Please speak slowly.\n- Thank you!`;
+    }
+    if(level === "A2"){
+      return `Fale por 2 minutos:\n- Hi, I’m __ and I’m from Brazil.\n- Today I’m practicing: ${goal}.\n- In my routine, I usually __.\n- I want to __ because __.\n- Can you help me with __?\n- See you later!`;
+    }
+    return `Fale por 3 minutos:\n- Introduce yourself and your day.\n- Explain: ${goal}.\n- Give 2 examples using because.\n- Ask 3 questions (Where/What/How).\n- End with a short summary.`;
+  }
+
+  function showAnswer(){
+    const back = document.getElementById("cardBack");
+    back.style.display = back.style.display === "none" ? "block" : "none";
+  }
+
+  function nextCard(){
+    state.idx++;
+    updateUI();
+  }
+
+  function markDone(){
+    if(!state.done.includes(state.day)){
+      state.done.push(state.day);
+      state.done.sort((a,b)=>a-b);
+      localStorage.setItem("doneDays", JSON.stringify(state.done));
+    }
+    updateUI();
+  }
+
+  function resetAll(){
+    if(confirm("Quer zerar seu progresso?")){
+      state.done = [];
+      localStorage.setItem("doneDays", "[]");
+      updateUI();
+    }
+  }
+
+  function newQuiz(){
+    const cards = cardsForDay(state.day);
+    state.quizIdx = Math.floor(Math.random() * cards.length);
+  }
+
+  function normalize(s){
+    return s.toLowerCase().trim()
+      .replace(/[’']/g,"'")
+      .replace(/\s+/g," ");
+  }
+
+  function checkQuiz(){
+    const cards = cardsForDay(state.day);
+    const q = cards[state.quizIdx % cards.length];
+    const user = normalize(document.getElementById("quizInput").value);
+    const ans = normalize(q.en);
+
+    // Aceita pequenas variações:
+    const ok = user === ans
+      || user.replace("i’m","im") === ans.replace("i’m","im")
+      || user.replace("please","pls") === ans;
+
+    const result = document.getElementById("result");
+    if(ok){
+      result.innerHTML = `<span class="ok">Correto.</span> Resposta: ${q.en}`;
+      newQuiz();
+    }else{
+      result.innerHTML = `<span class="bad">Quase.</span> O certo é: ${q.en}`;
+    }
+    updateUI();
+  }
+
+  document.getElementById("showBtn").onclick = showAnswer;
+  document.getElementById("nextBtn").onclick = nextCard;
+  document.getElementById("markBtn").onclick = markDone;
+  document.getElementById("resetBtn").onclick = resetAll;
+  document.getElementById("newQuizBtn").onclick = () => { newQuiz(); updateUI(); };
+  document.getElementById("checkBtn").onclick = checkQuiz;
+
+  document.getElementById("quizInput").addEventListener("keydown", (e) => {
+    if(e.key === "Enter") checkQuiz();
+  });
+
+  document.getElementById("level").addEventListener("change", (e) => {
+    state.level = e.target.value;
+    localStorage.setItem("level", state.level);
+    updateUI();
+  });
+
+  // Init
+  newQuiz();
+  updateUI();
+</script>
+</body>
+</html>
+  
