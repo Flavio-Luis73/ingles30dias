@@ -288,9 +288,15 @@
   }
 
   function showAnswer(){
-    const back = document.getElementById("cardBack");
-    back.style.display = back.style.display === "none" ? "block" : "none";
-  }
+  const back = document.getElementById("cardBack");
+  back.style.display = back.style.display === "none" ? "block" : "none";
+
+  const text = document.getElementById("cardFront").textContent;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "en-US";
+  utter.rate = 0.9;
+  speechSynthesis.speak(utter);
+}
 
   function nextCard(){
     state.idx++;
