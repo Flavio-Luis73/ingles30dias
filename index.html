@@ -280,9 +280,8 @@
     document.getElementById("speakScript").innerHTML = script.replace(/\n/g,"<br/>");
 
     const q = cards[state.quizIdx % cards.length];
-    document.getElementById("quizPrompt").textContent = `Traduza: "${q.pt}"`;
-    document.getElementById("quizInput").value = "";
-    document.getElementById("result").textContent = "";
+document.getElementById("quizPrompt").textContent = `Traduza: "${q.pt}"`;
+
   }
 
   function speak(){
@@ -337,7 +336,7 @@
       .replace(/\s+/g," ");
   }
 
-  function checkQuiz(){
+function checkQuiz(){
   const cards = cardsForDay(state.day);
   const q = cards[state.quizIdx % cards.length];
 
@@ -346,7 +345,6 @@
   const ansEN = normalize(q.en);
   const ansPT = normalize(q.pt);
 
-  // Aceita responder em inglês OU em português (mais amigável)
   const ok =
     user === ansEN ||
     user === ansPT ||
@@ -357,12 +355,14 @@
   if(ok){
     result.innerHTML = `<span class="ok">Correto.</span> Inglês: ${q.en} — Português: ${q.pt}`;
     newQuiz();
+    const next = cards[state.quizIdx % cards.length];
+    document.getElementById("quizPrompt").textContent = `Traduza: "${next.pt}"`;
+    document.getElementById("quizInput").value = "";
   }else{
     result.innerHTML = `<span class="bad">Quase.</span> Correto: Inglês: ${q.en} — Português: ${q.pt}`;
   }
-
-  updateUI();
 }
+
 
 
   document.getElementById("showBtn").onclick = showAnswer;
